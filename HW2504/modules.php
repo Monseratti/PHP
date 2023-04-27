@@ -167,4 +167,79 @@ class Gallery implements JsonSerializable
     }
 }
 
+class Product implements JsonSerializable
+{
+    protected $name, $count, $price;
+    function __construct($_name,$_count,$_price) {
+        $this->name = $_name;
+        $this->count = $_count;
+        $this->price = $_price;
+    }
+    function getTotal(){
+        return ($this->count*$this->price);
+    }
+    #[ReturnTypeWillChange]
+    function jsonSerialize(){
+        return [
+            'name'=>$this->name,
+            'count'=>$this->count,
+            'price'=>$this->price,
+            'total'=>($this->getTotal())
+        ];
+    }
+    function print(){
+        echo "<p>{$this->name}; {$this->price}$; Count:{$this->count}; Total: ".($this->getTotal())."$</p>";
+    }
+}
+
+class Ticket implements JsonSerializable
+{
+    protected $productList;
+
+    function __construct() {
+        $this->readFromFile();
+    }
+
+    function AddProduct($_name,$_count,$_price){
+        $today = date_create()->format("d/M/Y");
+        if(array_key_exists($today, $this->productList)){
+            array_push($this->productList[$today],new Product($_name,$_count,$_price));
+        }
+        else{
+            array_push($this->productList,[$today=>[new Product($_name,$_count,$_price)]]);
+        }
+        $fs=fopen('tickets.json','w');
+        fwrite($fs,json_encode($this));
+        fclose($fs);
+    }
+    #[ReturnTypeWillChange]
+    function jsonSerialize(){
+        return $this->productList;
+    }
+    function print()
+    {
+        $total = 0;
+        foreach ($this->productList as $date => $products) {
+            echo "<p>{$date}</p>";
+            foreach ($products as $product) {
+                $product->print();
+                $total+=$product->getTotal();
+            }
+            echo "<p>Total Price: {$total}</p>";
+        }
+    }
+    protected function readFromFile(){
+        if(file_exists('tickets.json')){
+            $arr = json_decode(file_get_contents('gallery.json'),true);
+            print_r($arr);
+            // if($arr!=null){
+            //     foreach ($arr as $date => $products) {
+            //         foreach ($products as $product) {
+            //             $this->productList[$date][] = new Product($product['name'],$product['count'],$product['price']);
+            //         }
+            //     }
+            // }
+        }
+    }
+}
 ?>

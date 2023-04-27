@@ -1,11 +1,11 @@
 <?php
 include("modules.php");
-$news = new News();
+//$news = new News();
 $head="Lorem, ipsum.";
 $short="Lorem ipsum, dolor sit amet consectetur adipisicing elit. At, numquam!";
 $full="Lorem ipsum dolor sit amet consectetur, adipisicing elit. Consequuntur ipsa earum recusandae iste, laboriosam corrupti ipsam ab, culpa aspernatur accusantium in. Culpa facere dicta voluptas explicabo temporibus cupiditate, recusandae hic animi tempore itaque? Nemo suscipit, deleniti consequuntur libero error laboriosam?";
 //$news->GetArticles();
-$gallery = new Gallery();
+//$gallery = new Gallery();
 //echo "Number of images in gallery is {$gallery->NumberOfImages()}";
 $ticket = new Ticket();
 ?>
@@ -34,8 +34,8 @@ $ticket = new Ticket();
     <button>Buy</button>
 </form>
 <?php
-    if(isset($_POST['Name'])&&isset($_POST['Count'])&&isset($_POST['Price'])){
-        $ticket->AddProduct($_POST['Name'],$_POST['Count'],$_POST['Price']);
+    if(isset($_POST['name'])&&isset($_POST['count'])&&isset($_POST['price'])){
+        $ticket->AddProduct($_POST['name'],$_POST['count'],$_POST['price']);
     }
 ?>
 <form action="tickets.php" method="get">

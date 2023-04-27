@@ -202,12 +202,7 @@ class Ticket implements JsonSerializable
 
     function AddProduct($_name,$_count,$_price){
         $today = date_create()->format("d/M/Y");
-        if(array_key_exists($today, $this->productList)){
-            array_push($this->productList[$today],new Product($_name,$_count,$_price));
-        }
-        else{
-            array_push($this->productList,[$today=>[new Product($_name,$_count,$_price)]]);
-        }
+        $this->productList[$today][]=new Product($_name,$_count,$_price);
         $fs=fopen('tickets.json','w');
         fwrite($fs,json_encode($this));
         fclose($fs);
@@ -230,15 +225,14 @@ class Ticket implements JsonSerializable
     }
     protected function readFromFile(){
         if(file_exists('tickets.json')){
-            $arr = json_decode(file_get_contents('gallery.json'),true);
-            print_r($arr);
-            // if($arr!=null){
-            //     foreach ($arr as $date => $products) {
-            //         foreach ($products as $product) {
-            //             $this->productList[$date][] = new Product($product['name'],$product['count'],$product['price']);
-            //         }
-            //     }
-            // }
+            $arr = json_decode(file_get_contents('tickets.json'),true);
+            if($arr!=null){
+                foreach ($arr as $date => $products) {
+                    foreach ($products as $product) {
+                        $this->productList[$date][]=new Product($product['name'],$product['count'],$product['price']);
+                    }
+                }
+            }
         }
     }
 }

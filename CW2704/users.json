@@ -1,1 +1,6 @@
-[{"login":"Roman","pass":"123456"}]
+[
+    {"login":"Roman","pass":"123456"},
+    {"login":"AnotherUser","pass":"123456"},
+    {"login":"SomeUser","pass":"123456"},
+    {"login":"User3","pass":"123456"},
+    {"login":"User5","pass":"123456"}]

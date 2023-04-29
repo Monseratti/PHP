@@ -64,22 +64,20 @@ class Message implements JsonSerializable
             'message'=>$this->messText
         ];
     }
-    function Save(){
+    function Save($path='message.json'){
         $messages = [];
-        if(file_exists("message.json")){
-            $arr = json_decode(file_get_contents("message.json"));
+        if(file_exists($path)){
+            $arr = json_decode(file_get_contents($path));
             if($arr!=null){
                 foreach ($arr as $message) {
                     $messages[]=new Message($message->name,$message->message);
                 }
             }
         }
-
         $messages[] = $this;
-        $fs = fopen("message.json","w");
+        $fs = fopen($path,"w");
         fwrite($fs,json_encode($messages));
         fclose($fs);
-        print_r($messages);
     }
     function print(){
         echo "<p>{$this->user}: {$this->messText}</p>";

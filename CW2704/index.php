@@ -18,8 +18,20 @@
     if(isset($_POST['refresh'])){
       setcookie("isLogged","",time()*-1);
       setcookie("userName","", time()*-1);
+      setcookie("msgPath","",time()*-1);
     }
-    
+    if(isset($_POST['startPrivate'])&&isset($_POST['privateName'])){
+      if(file_exists("{$_POST['privateName']}_{$_COOKIE['userName']}.json")){
+        setcookie("msgPath","{$_POST['privateName']}_{$_COOKIE['userName']}.json");
+      }
+      else{
+        setcookie("msgPath","{$_COOKIE['userName']}_{$_POST['privateName']}.json");
+      }
+    }
+    if(isset($_POST['endPrivate'])){
+      unlink($_COOKIE['msgPath']);
+      setcookie("msgPath","",time()*-1);
+    }
     ?>
 <!doctype html>
 <html lang="en">
@@ -52,8 +64,23 @@
         <button class="btn btn-success" name='login'>Login</button>
     </form>
     <hr/>
-    <hr/>
     <form action="" method="post">
+    <div class='d-flex'>
+    <?php
+    if(file_exists("users.json")&&(isset($_COOKIE['isLogged'])&&boolval($_COOKIE['isLogged'])==true)){
+      $arr = json_decode(file_get_contents("users.json"),true);
+      if($arr!=null){
+        for ($i=0; $i < count($arr); $i++) { 
+          if($arr[$i]['login']!=$_COOKIE['userName']){
+            echo "<input type='radio' class='btn-check' name='privateName' id='privateName_$i' value='{$arr[$i]['login']}'> 
+            <label class='btn btn-outline-primary' for='privateName_$i'>{$arr[$i]['login']}</label>";
+          }
+        }
+      }
+    }
+    ?>
+    </div>
+    <hr/>
         <input name='message' placeholder="Message"/>
         <button class="btn btn-primary" name='send' <?php 
         if(!isset($_COOKIE['isLogged'])||boolval($_COOKIE['isLogged'])==false){
@@ -65,17 +92,23 @@
         ?>>Send</button>
         <button class="btn btn-warning" name='seeMes'>See messages</button>
         <button class="btn btn-danger" name='refresh'>Refresh</button>
+        <button class="btn btn-success" name='startPrivate'>Start private</button>
+        <button class="btn btn-secondary" name='endPrivate'>End private</button>
     </form>
   </main>
 <?php
+  $msgPath = "message.json";
+  if(isset($_COOKIE['msgPath'])){
+    $msgPath = $_COOKIE['msgPath'];
+  }
   if(isset($_POST['send'])&&isset($_POST['message'])){
     $mes = new Message($_COOKIE['userName'],$_POST['message']);
-    $mes->Save();
+    $mes->Save($msgPath);
   }
   if(isset($_POST['seeMes'])){
     $messages = [];
-      if(file_exists("message.json")){
-          $arr = json_decode(file_get_contents("message.json"));
+      if(file_exists($msgPath)){
+          $arr = json_decode(file_get_contents($msgPath));
           if($arr!=null){
               foreach ($arr as $message) {
                   $messages[]=new Message($message->name,$message->message);

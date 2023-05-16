@@ -39,6 +39,8 @@ class Route{
 		if(file_exists($controller_path))
 		{
 			include $controller_path;
+			$controller_main = new Controller_Main();
+			$controller_main->action_index();
 		}
 		else
 		{

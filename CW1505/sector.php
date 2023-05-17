@@ -6,15 +6,6 @@ if(!isset($_SESSION["userLogin"])){
     die();
 }
 $conn = DB::DbConnect("localhost","root","","Shop");
-$allowCategory = false;
-$allowProduct = false;
-if(DB::GetAny($conn,"_Sector")){
-    $allowCategory = true;
-}
-if(DB::GetAny($conn,"_Category")){
-    $allowProduct = true;
-}
-$sectors = DB::GetAll($conn,"_Sector");
 ?>
 <!doctype html>
 <html lang="en">
@@ -34,38 +25,29 @@ $sectors = DB::GetAll($conn,"_Sector");
 <body>
   <main>
     <form action="" method="post">
-        <div class="d-flex flex-column col-md-3 col-12">
-            <button class='btn btn-primary' name="sector">Add sector</button>
-            <button class='btn btn-primary' name="category" <?php echo $allowCategory?"":"disabled"?>>Add category</button>
-            <button class='btn btn-primary' name="product" <?php echo $allowProduct?"":"disabled"?>>Add product</button>
-            <button class='btn btn-danger' name="logout">Log out</button>
-        </div>
-    </form>
     <div class="d-flex flex-column col-md-3 col-12">
-        <?php foreach ($sectors as $sector):?>
-          <a href="category.php?id=<?= $sector['id']?>"><?= $sector['_name']?></a>
-        <?php endforeach?>
+        <input name="catName" placeholder="Title of sector" required>
+        <button class="btn btn-outline-primary">Add sector</button>
     </div>
-
-
+    </form>
+    <?php
+    if(isset($_POST["catName"])){
+      $sql = "SELECT * FROM _Sector WHERE _Sector._name = '{$_POST["catName"]}'";
+      if(mysqli_query($conn,$sql)->fetch_array()){
+        echo "Sector already exist";
+      }
+      else{
+        if(DB::InsertIntoTable($conn,"_Sector","_name","('{$_POST["catName"]}')")){
+          header('Location: main.php');
+          die();
+        }
+        else{
+          echo "Some error";
+        }
+      }
+    }
+    ?>
   </main>
-  <?php
-  if(isset($_POST['sector'])){
-    header('Location: sector.php');
-    die();
-  }
-  if(isset($_POST['category'])){
-    header('Location: category.php');
-    die();
-  }
-  if(isset($_POST['product'])){
-    header('Location: product.php');
-    die();
-  }
-  if(isset($_POST['logout'])){
-    session_destroy();
-  }
-  ?>
   <!-- Bootstrap JavaScript Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
     integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">

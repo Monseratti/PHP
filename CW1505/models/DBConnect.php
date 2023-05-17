@@ -39,7 +39,19 @@ class DB
         $sql = $sql."$strParams";
         return mysqli_query($conn,$sql);
     }
-
+    static function GetAny($conn, $tableName){
+        $sql = "SELECT * FROM $tableName LIMIT 1";
+        if(mysqli_query($conn,$sql)->fetch_array()){
+            return true;
+        }
+        return false;
+    }
+    static function GetAll($conn, $tableName){
+        $sql = "SELECT * FROM $tableName";
+        if(mysqli_query($conn,$sql)->fetch_array()){
+            return mysqli_query($conn,$sql);
+        }
+    }
     static function AlterTable($conn,$name,$type, $params){
         $sql = "ALTER TABLE $name";
         $strParams = "$type ";

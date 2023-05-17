@@ -67,6 +67,10 @@ include("models/user.php");
     if(!$IsError){
         $user = new User($_POST["login"],$_POST["pass"],$_POST["name"],$_POST["surname"],
         $_POST["phone"],$_POST["country"]);
+        $sql = "SELECT _User._login as 'login' FROM `_User` WHERE _User._login = '{$user->getLogin()}'";
+        if(mysqli_query($conn,$sql)->fetch_array()){
+            return "<p>User already exist</p>";
+        }
         if(DB::InsertIntoTable(DB::DbConnect('localhost','root','','Shop'), 
         "_User", $user->getParamsString(),
         $user->getInsertValueSqlString()))

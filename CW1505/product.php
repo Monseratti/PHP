@@ -9,9 +9,30 @@ if(!isset($_SESSION["userLogin"])){
 $conn = DB::DbConnect("localhost","root","","Shop");
 $categories = DB::GetAll($conn,"_Category");
 $products = DB::GetAll($conn,"_Product");
-$query = "SELECT * FROM _Product";
 
+$query = "SELECT * FROM _Product";
+$_makeArray = [];
+$_countryArray = [];
 $filtered_get = array_filter($_GET); // removes empty values from $_GET
+foreach ($filtered_get as $key => $value) {
+  if (str_contains($key,'_make')) {
+    $_makeArray[] = $value;
+    unset($filtered_get[$key]);
+  }
+  if (str_contains($key,'_country')) {
+    $_countryArray[] = $value;
+    unset($filtered_get[$key]);
+  }
+  if (str_contains($key,'min')||str_contains($key,'max')) {
+    unset($filtered_get[$key]);
+  }
+}
+if(count($_makeArray)){
+  $filtered_get['_make'] = $_makeArray;
+}
+if(count($_countryArray)){
+  $filtered_get['_country'] = $_countryArray;
+}
 if (count($filtered_get)) { // not empty
   $query .= " WHERE";
   
@@ -19,30 +40,51 @@ if (count($filtered_get)) { // not empty
 
     foreach($filtered_get as $key => $value)
     {
-       $query .= " $key='$filtered_get[$key]'";  // $filtered_get keyname = $filtered_get['keyname'] value
-       if (count($filtered_get) > 1 && (count($filtered_get)-1 > array_search($key,$keynames))) { // more than one search filter, and not the last
-          $query .= " AND";
-       }
+      if(gettype($value)=='array'){
+        $text = "(";
+        foreach ($value as $val) {
+          $text = $text."'$val',";
+        }
+        $text = rtrim($text,',');
+        $text = $text.")";
+        $query .= " $key IN $text";  // $filtered_get keyname = $filtered_get['keyname'] value
+      }
+      else{
+        $query .= " $key='$filtered_get[$key]'";  // $filtered_get keyname = $filtered_get['keyname'] value
+      }
+      if (count($filtered_get) > 1 && (count($filtered_get)-1 > array_search($key,$keynames))) { // more than one search filter, and not the last
+        $query .= " AND";
+      }
     }
 }
-$query .= ";";
+if(isset($_GET['min'])&&$_GET['min']!=""&&(!isset($_GET['max'])||$_GET['max']=="")){
+  $query .= " AND _price>={$_GET['min']}";
+}
+if(isset($_GET['max'])&&$_GET['max']!=""&&(!isset($_GET['min'])||$_GET['min']=="")){
+  $query .= " AND _price<={$_GET['max']}";
+}
+if(isset($_GET['min'])&&$_GET['min']!=""&&isset($_GET['max'])&&$_GET['max']!=""){
+  $query .= " AND _price BETWEEN {$_GET['min']} AND {$_GET['max']}";
+}
+$_SESSION["sql"]= $query;
 $products = mysqli_query($conn,$query);
 if(isset($_REQUEST['_categoryId'])&&isset($_REQUEST['ascName'])){
-  $sql = "SELECT * FROM _Product WHERE _Product._categoryId = {$_REQUEST['_categoryId']} ORDER BY _Product._name";
+  $sql = $_SESSION["sql"]." ORDER BY _Product._name";
   $products = mysqli_query($conn,$sql);
 }
 if(isset($_REQUEST['_categoryId'])&&isset($_REQUEST['descName'])){
-  $sql = "SELECT * FROM _Product WHERE _Product._categoryId = {$_REQUEST['_categoryId']} ORDER BY _Product._name DESC";
+  $sql = $_SESSION["sql"]." ORDER BY _Product._name DESC";
   $products = mysqli_query($conn,$sql);
 }
 if(isset($_REQUEST['_categoryId'])&&isset($_REQUEST['ascPrice'])){
-  $sql = "SELECT * FROM _Product WHERE _Product._categoryId = {$_REQUEST['_categoryId']} ORDER BY _Product._price";
+  $sql = $_SESSION["sql"]." ORDER BY _Product._price";
   $products = mysqli_query($conn,$sql);
 }
 if(isset($_REQUEST['_categoryId'])&&isset($_REQUEST['descPrice'])){
-  $sql = "SELECT * FROM _Product WHERE _Product._categoryId = {$_REQUEST['_categoryId']} ORDER BY _Product._price DESC";
+  $sql = $_SESSION["sql"]." ORDER BY _Product._price DESC";
   $products = mysqli_query($conn,$sql);
 }
+echo $_SESSION["sql"];
 ?>
 <!doctype html>
 <html lang="en">
@@ -121,8 +163,10 @@ if(isset($_REQUEST['_categoryId'])&&isset($_REQUEST['descPrice'])){
                 $makeArr[] = $product['_make'];
               }
             }
+            $count = 0;
             foreach ($makeArr as $make):?>
-              <label><input type="checkbox" name="_make" value="<?=$make?>"><?=$make?></label>
+              <label><input type="checkbox" name="_make::<?= $count?>" value="<?=$make?>"><?=$make?></label>
+            <?php $count++;?>
             <?php endforeach?>
             <hr/>
             <?php 

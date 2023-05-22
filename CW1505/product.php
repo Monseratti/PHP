@@ -66,6 +66,7 @@ if(isset($_GET['max'])&&$_GET['max']!=""&&(!isset($_GET['min'])||$_GET['min']=="
 if(isset($_GET['min'])&&$_GET['min']!=""&&isset($_GET['max'])&&$_GET['max']!=""){
   $query .= " AND _price BETWEEN {$_GET['min']} AND {$_GET['max']}";
 }
+echo $query;
 $_SESSION["sql"]= $query;
 $products = mysqli_query($conn,$query);
 if(isset($_REQUEST['_categoryId'])&&isset($_REQUEST['ascName'])){
@@ -84,7 +85,6 @@ if(isset($_REQUEST['_categoryId'])&&isset($_REQUEST['descPrice'])){
   $sql = $_SESSION["sql"]." ORDER BY _Product._price DESC";
   $products = mysqli_query($conn,$sql);
 }
-echo $_SESSION["sql"];
 ?>
 <!doctype html>
 <html lang="en">

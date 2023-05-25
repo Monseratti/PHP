@@ -14,11 +14,15 @@
 </head>
 
 <body>
+  <header>
+    <!-- place navbar here -->
+  </header>
   <main>
-    <p>Hello Wordl!</p>
-    <a href="login" class="bnt-primary">Login</a>
-    <a href="registration" class="bnt-primary">Registration</a>
+  <?= $this->renderSection('layoutBody')?>
   </main>
+  <footer>
+    <!-- place footer here -->
+  </footer>
   <!-- Bootstrap JavaScript Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
     integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
